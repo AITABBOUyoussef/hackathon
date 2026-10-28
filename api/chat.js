@@ -1,27 +1,154 @@
 import plantes from '../src/data/plantes.json' with { type: 'json' };
 
 const disclaimer = 'Information à caractère informatif, pas un conseil médical.';
-const normalize = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const normalize = (value = '') =>
+  String(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const plantAliases = {
+  4: ['romarin', 'rosemary', 'rosmarinus', 'azir', 'iklil', 'iklil jabal', 'إكليل الجبل', 'الأزير'],
+  8: ['caroubier', 'carob', 'khrob', 'الخروب', 'ceratonia'],
+  12: ['lavande', 'lavender', 'lavandula', 'khzama', 'الخزامى'],
+  3: ['olivier', 'olive tree', 'oliva', 'olivier', 'الزيتون'],
+  6: ['chih', 'chiche', 'shih', 'الشياح', 'شيح', 'artemisia', 'herba alba'],
+  5: ['zaatar', 'thyme', 'thymus', 'زعتر'],
+  7: ['menthe pouliot', 'menthe', 'pulegium', 'فليو', 'الفليو'],
+  11: ['sanouj', 'nigella', 'graines noir', 'الحبة السوداء', 'السانوج'],
+  1: ['tetraclinis', 'thuya', 'arar', 'عرعار', 'الثويا'],
+  10: ['taga', 'juniper', 'juniperus', 'التاقة'],
+  9: ['drou', 'lentisque', 'pistacia lentiscus', 'الضرو']
+};
+
+function hasAnyPhrase(text, phrases) {
+  const query = normalize(text);
+  return phrases.some((phrase) => query.includes(normalize(phrase)));
+}
+
+function findPlantByAlias(question) {
+  const query = normalize(question);
+  for (const [plantId, aliases] of Object.entries(plantAliases)) {
+    if (aliases.some((alias) => query.includes(normalize(alias)))) {
+      return plantes.find((plant) => plant.id === Number(plantId));
+    }
+  }
+  return null;
+}
+
+function findPlantMatches(question) {
+  const query = normalize(question);
+
+  return plantes.filter((plant) => {
+    const haystack = normalize([
+      plant.nom_ar,
+      plant.nom_latin,
+      plant.type,
+      ...plant.usages,
+      ...plant.provinces,
+      plant.source
+    ].join(' '));
+
+    if (!query) return false;
+    if (haystack.includes(query)) return true;
+
+    const tokens = query.split(' ').filter(Boolean);
+    return tokens.length > 0 && tokens.every((token) => haystack.includes(token));
+  });
+}
 
 function localAnswer(question) {
-  const normalizedQuestion = normalize(question);
-  const province = plantes
-    .flatMap((plant) => plant.provinces)
-    .find((item) => normalizedQuestion.includes(normalize(item)));
+  const query = normalize(question);
+  if (!query) return null;
 
-  if (province && /(plante|pousse|trouve|existe|quoi|quelles)/i.test(normalizedQuestion)) {
-    const matches = plantes.filter((plant) => plant.provinces.includes(province));
+  const aliasPlant = findPlantByAlias(question);
+  if (aliasPlant) {
     return {
-      reponse: `Dans la province de ${province}, le guide Nabta référence : ${matches.map((plant) => plant.nom_ar).join(', ')}. ${disclaimer}`,
+      reponse: `${aliasPlant.nom_ar} (${aliasPlant.nom_latin}) est une ${aliasPlant.type} présente dans ${aliasPlant.provinces.join(', ')}. Ses usages principaux sont : ${aliasPlant.usages.join(', ')}. ${disclaimer}`,
+      plante_id: aliasPlant.id
+    };
+  }
+
+  const provinceMatches = plantes.flatMap((plant) => plant.provinces.map((province) => ({ province, plant })));
+  const provinceHit = provinceMatches.find(({ province }) => hasAnyPhrase(query, [province]));
+  if (provinceHit) {
+    const province = provinceHit.province;
+    const matches = plantes.filter((plant) => plant.provinces.includes(province));
+    if (matches.length) {
+      return {
+        reponse: `Dans la province de ${province}, le guide Nabta référence ${matches.length} plante${matches.length > 1 ? 's' : ''} : ${matches.map((plant) => `${plant.nom_ar} (${plant.nom_latin})`).join(', ')}. ${disclaimer}`,
+        plante_id: null
+      };
+    }
+  }
+
+  const usageRules = [
+    ['infusion', ['infusion', 'tisane', 'the', 'infuser']],
+    ['cuisine', ['cuisine', 'assaisonnement', 'plat', 'cuisin']],
+    ['huile essentielle', ['huile', 'essentielle', 'huile essentielle']],
+    ['bois', ['bois', 'charpente']],
+    ['parfum', ['parfum', 'odeur', 'senteur']],
+    ['alimentation', ['alimentation', 'nourriture', 'food']],
+    ['fourrage', ['fourrage', 'animaux']],
+    ['usage traditionnel', ['tradition', 'traditionnel', 'medicinale', 'phytotherapie']]
+  ];
+
+  for (const [label, terms] of usageRules) {
+    if (hasAnyPhrase(query, terms)) {
+      const matches = plantes.filter((plant) => plant.usages.some((usage) => hasAnyPhrase(usage, terms)));
+      if (matches.length) {
+        return {
+          reponse: `Les plantes du guide Nabta associées à ${label} sont : ${matches.map((plant) => `${plant.nom_ar} (${plant.nom_latin})`).join(', ')}. ${disclaimer}`,
+          plante_id: null
+        };
+      }
+    }
+  }
+
+  const typeRules = [
+    ['arbre', ['arbre']],
+    ['arbre fruitier', ['arbre fruitier', 'arbre fruitier']],
+    ['arbuste', ['arbuste']],
+    ['plante aromatique', ['aromatique', 'aromatique']],
+    ['plante médicinale', ['medicinale', 'medicinal']],
+    ['graine', ['graine', 'graines']]
+  ];
+
+  for (const [label, terms] of typeRules) {
+    if (hasAnyPhrase(query, terms)) {
+      const matches = plantes.filter((plant) => hasAnyPhrase(plant.type, terms));
+      if (matches.length) {
+        return {
+          reponse: `Dans le guide Nabta, les ${label} sont : ${matches.map((plant) => `${plant.nom_ar} (${plant.nom_latin})`).join(', ')}. ${disclaimer}`,
+          plante_id: null
+        };
+      }
+    }
+  }
+
+  const directMatches = findPlantMatches(question);
+  if (directMatches.length === 1) {
+    const plant = directMatches[0];
+    return {
+      reponse: `${plant.nom_ar} (${plant.nom_latin}) est une ${plant.type} présente dans ${plant.provinces.join(', ')}. Ses usages principaux sont : ${plant.usages.join(', ')}. ${disclaimer}`,
+      plante_id: plant.id
+    };
+  }
+
+  if (directMatches.length > 1) {
+    return {
+      reponse: `J’ai trouvé plusieurs plantes correspondantes : ${directMatches.map((plant) => `${plant.nom_ar} (${plant.nom_latin})`).join(', ')}. ${disclaimer}`,
       plante_id: null
     };
   }
 
-  const plant = plantes.find((item) => normalizedQuestion.includes(normalize(item.nom_latin)) || normalizedQuestion.includes(item.nom_ar));
-  if (plant) {
+  if (/combien|nombre|total/.test(query) && /plante|plantes|graine|graines/.test(query)) {
     return {
-      reponse: `${plant.nom_ar} (${plant.nom_latin}) est référencée pour : ${plant.usages.join(', ')}. ${disclaimer}`,
-      plante_id: plant.id
+      reponse: `Le guide Nabta contient ${plantes.length} plantes et graines documentées. ${disclaimer}`,
+      plante_id: null
     };
   }
 
