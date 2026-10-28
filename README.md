@@ -23,20 +23,21 @@ npm run dev
 ```
 
 Le site est ensuite disponible à l'adresse affichée par Vite.
+En développement local, le serveur Vite expose aussi automatiquement la fonction `/api/chat`.
 
 ## Assistant IA
 
-Copiez `.env.example` vers `.env`, puis renseignez votre clé :
+Copiez `.env.example` vers `.env`, puis renseignez votre clé Gemini :
 
 ```env
-ANTHROPIC_API_KEY=votre_cle
+GEMINI_API_KEY=votre_cle_gemini
 ```
 
-La clé est uniquement utilisée par la fonction serverless `api/chat.js` et n'est jamais incluse dans le code React.
+La clé est uniquement utilisée par la fonction serverless `api/chat.js` et n'est jamais incluse dans le code React. L'application utilise Gemini Flash pour générer les réponses en JSON à partir du guide local.
 
 ## Déploiement sur Vercel
 
-Importez le projet dans Vercel, ajoutez `ANTHROPIC_API_KEY` dans les variables d'environnement, puis déployez. Vercel détecte automatiquement Vite et le dossier `api/`.
+Importez le projet dans Vercel, ajoutez `GEMINI_API_KEY` dans les variables d'environnement, puis déployez. Vercel détecte automatiquement Vite et le dossier `api/`.
 
 ## Ajouter une plante
 
@@ -47,4 +48,4 @@ Les données sont dans [`src/data/plantes.json`](src/data/plantes.json). Pour co
 - `src/main.jsx` : interface, recherche, filtres, fiche et chat.
 - `src/styles.css` : design responsive vert et terre.
 - `src/data/plantes.json` : collection locale.
-- `api/chat.js` : fonction serverless qui appelle Anthropic.
+- `api/chat.js` : fonction serverless qui appelle Gemini.
