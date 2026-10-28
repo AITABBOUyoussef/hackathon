@@ -1,0 +1,14 @@
+[
+  {"id":1,"nom_ar":"العرعار (الثويا)","nom_latin":"Tetraclinis articulata","type":"arbre","provinces":["Azilal","Béni Mellal","Fquih Ben Salah","Khénifra","Khouribga"],"usages":["bois","usage traditionnel en phytothérapie"],"source":"Zahir et al. (2020), Ethnobotany Research and Applications 19","verifie":false},
+  {"id":2,"nom_ar":"الأرز","nom_latin":"Cedrus atlantica","type":"arbre","provinces":["Khénifra","Azilal"],"usages":["bois","reboisement","huile essentielle"],"source":"À compléter","verifie":false},
+  {"id":3,"nom_ar":"الزيتون","nom_latin":"Olea europaea","type":"arbre fruitier","provinces":["Béni Mellal","Fquih Ben Salah","Azilal"],"usages":["alimentation","huile"],"source":"À compléter","verifie":false},
+  {"id":4,"nom_ar":"الأزير (إكليل الجبل)","nom_latin":"Rosmarinus officinalis","type":"plante aromatique","provinces":["Khénifra","Béni Mellal","Azilal"],"usages":["infusion","cuisine","huile essentielle"],"source":"À compléter","verifie":false},
+  {"id":5,"nom_ar":"الزعتر","nom_latin":"Thymus sp.","type":"plante aromatique","provinces":["Khénifra","Azilal","Béni Mellal"],"usages":["infusion","cuisine"],"source":"À compléter","verifie":false},
+  {"id":6,"nom_ar":"الشيح","nom_latin":"Artemisia herba-alba","type":"plante médicinale","provinces":["Khouribga","Fquih Ben Salah","Khénifra"],"usages":["infusion traditionnelle"],"source":"À compléter","verifie":false},
+  {"id":7,"nom_ar":"الفليو","nom_latin":"Mentha pulegium","type":"plante aromatique","provinces":["Béni Mellal","Khénifra","Azilal"],"usages":["infusion","cuisine"],"source":"À compléter","verifie":false},
+  {"id":8,"nom_ar":"الخروب","nom_latin":"Ceratonia siliqua","type":"arbre","provinces":["Béni Mellal","Azilal"],"usages":["alimentation","fourrage"],"source":"À compléter","verifie":false},
+  {"id":9,"nom_ar":"الضرو","nom_latin":"Pistacia lentiscus","type":"arbuste","provinces":["Béni Mellal","Khénifra"],"usages":["usage traditionnel","résine"],"source":"À compléter","verifie":false},
+  {"id":10,"nom_ar":"التاقة","nom_latin":"Juniperus oxycedrus","type":"arbuste","provinces":["Khénifra","Azilal"],"usages":["bois","usage traditionnel"],"source":"À compléter","verifie":false},
+  {"id":11,"nom_ar":"السانوج (الحبة السوداء)","nom_latin":"Nigella sativa","type":"graine","provinces":["Béni Mellal","Fquih Ben Salah"],"usages":["cuisine","usage traditionnel"],"source":"À compléter","verifie":false},
+  {"id":12,"nom_ar":"الخزامى","nom_latin":"Lavandula sp.","type":"plante aromatique","provinces":["Khénifra","Azilal"],"usages":["parfum","infusion","huile essentielle"],"source":"À compléter","verifie":false}
+]
